@@ -12,7 +12,7 @@ Currently only integrate with Billplz
 ```sh
 $ npm install
 ```
-* Edit sample.env & put in needed value
+* Edit sample.env & put in needed value and save it as .env
 ```sh
 BILLPLZSECRETKEY= <PUT IN YOUR BILLPLZ SECRET KEY HERE >
 BILLPLZCOLLECTIONKEY= <PUT IN YOUR BILLPLZ COLLECTION CODE HERE>
