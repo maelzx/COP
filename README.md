@@ -27,7 +27,7 @@ SYSTEMURL=https://domain.com/ <CONFIGURE YOUR DOMAIN>
 ```sh
 $ node index.js
 ```
-* go to http://yourdomain:3000 or http:localhost:3000
+* go to http://yourdomain:3000 or http://localhost:3000
 
 ### Todo
 * To properly handle all the error
