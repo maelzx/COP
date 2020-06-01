@@ -1,0 +1,55 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no')
+  link(rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css' integrity='sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk' crossorigin='anonymous')
+  link(rel='icon' href='/public/favicon.ico')
+  title= title
+body
+  .container
+    .row
+      .col-md-6.offset-md-3.mt-5
+        .card
+          .card-header
+            | Team FGWalet KL | #{nama_agent}
+          .card-body
+            if sudah_bayar
+              h5.card-title
+                .alert.alert-success(role='alert') Terima Kasih atas bayaran anda
+              p.card-text Tarikh bayaran dibuat: #{tarikh_bayaran}
+            else
+              h5.card-title Sila buat bayaran untuk:
+            p.card-text= keterangan
+            p.card-text Harga: RM #{harga}
+            p.card-text Nama: #{nama}
+            p.card-text No telefon: #{no_telefon}
+            if !sudah_bayar
+              p.card-text Sila buat pilihan dan tekan 'Teruskan'
+              form(method='post')
+                .form-group
+                   label(for='bank') Pilih Bank:
+                   select#bank.form-control(name='bank')
+                     option(value='') ...
+                     option(value='MB2U0227') Maybank2u
+                     option(value='BCBB0235') CIMB Clicks
+                     option(value='PBB0233') Public Bank
+                     option(value='AMBB0209') AMBank
+                     option(value='RHB0218') RHB
+                     option(value='HLB0224') HONG LEONG Bank
+                     option(value='BIMB0340') Bank Islam
+                     option(value='BKRM0602') Bank Rakyat
+                     option(value='UOB0226') UOB
+                     option(value='ABMB0212') ALLIANCE Bank
+                     option(value='ABB0233') AFFIN Bank
+                     option(value='OCBC0229') OCBC
+                     option(value='HSBC0223') HSBC
+                     option(value='CIT0217') Citibank
+                     option(value='SCB0216') Standard Chartered
+                button.btn.btn-primary(type='submit') Teruskan
+            p.card-text
+              hr
+              span.badge.badge-secondary Diuruskan oleh ISHA FIZ ENTERPRISE (002575430W)
+            
+script(src='https://code.jquery.com/jquery-3.5.1.slim.min.js' integrity='sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj' crossorigin='anonymous')
+script(src='https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js' integrity='sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo' crossorigin='anonymous')
+script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js' integrity='sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI' crossorigin='anonymous')
