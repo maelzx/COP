@@ -5,6 +5,7 @@ const path = require('path');
 const jsonfile = require('jsonfile')
 
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
+const jsonParser = bodyParser.json()
 
 const Billplz = require('billplz')
 const billplz = new Billplz(process.env.BILLPLZSECRETKEY)
@@ -101,7 +102,7 @@ router.get('/:bayarid', function(req, res) {
 
 })
 
-router.post("/create-payment-intent", async (req, res) => {
+router.post("/create-payment-intent", jsonParser, async function(req, res) {
   const input = req.body;
   console.log(input)
 
