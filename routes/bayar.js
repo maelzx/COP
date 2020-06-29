@@ -12,6 +12,9 @@ const billplz_collection = process.env.BILLPLZCOLLECTIONKEY
 
 const url_sistem = process.env.SYSTEMURL
 
+const stripe = require("stripe")(process.env.STRIPESECRETKEY);
+const stripePK = process.env.STRIPEPUBLICKEY
+
 
 function dapatkan_keterangan_bayaran(bayarid) {
 
@@ -89,7 +92,9 @@ router.get('/:bayarid', function(req, res) {
     nama: keterangan_bayaran.nama,
     no_telefon: keterangan_bayaran.no_telefon,
     tarikh_bayaran: keterangan_bayaran.billplz_paid_at,
-    nama_agent: keterangan_bayaran.nama_agent
+    nama_agent: keterangan_bayaran.nama_agent,
+    stripe_public_key: stripePK,
+    bayar_id: req.params.bayarid,
   }
 
   res.render('bayar', data)
@@ -127,6 +132,21 @@ router.post('/:bayarid', urlencodedParser, function(req, res) {
       })
 
 })
+
+router.post("/create-payment-intent", async (req, res) => {
+  const input = req.body;
+
+  const keterangan_bayaran = dapatkan_keterangan_bayaran(input.id)
+
+  // Create a PaymentIntent with the order amount and currency
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: keterangan_bayaran.harga_barang,
+    currency: "myr"
+  });
+  res.send({
+    clientSecret: paymentIntent.client_secret
+  });
+});
 
 //Return router
 module.exports = router;
