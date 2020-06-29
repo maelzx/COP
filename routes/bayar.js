@@ -101,6 +101,22 @@ router.get('/:bayarid', function(req, res) {
 
 })
 
+router.post("/create-payment-intent", async (req, res) => {
+  const input = req.body;
+  console.log(input)
+
+  const keterangan_bayaran = dapatkan_keterangan_bayaran(input.id)
+
+  // Create a PaymentIntent with the order amount and currency
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: keterangan_bayaran.harga_barang,
+    currency: "myr"
+  });
+  res.send({
+    clientSecret: paymentIntent.client_secret
+  });
+});
+
 router.post('/:bayarid', urlencodedParser, function(req, res) {
 
   const keterangan_bayaran = dapatkan_keterangan_bayaran(req.params.bayarid)
@@ -132,21 +148,6 @@ router.post('/:bayarid', urlencodedParser, function(req, res) {
       })
 
 })
-
-router.post("/create-payment-intent", async (req, res) => {
-  const input = req.body;
-
-  const keterangan_bayaran = dapatkan_keterangan_bayaran(input.id)
-
-  // Create a PaymentIntent with the order amount and currency
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: keterangan_bayaran.harga_barang,
-    currency: "myr"
-  });
-  res.send({
-    clientSecret: paymentIntent.client_secret
-  });
-});
 
 //Return router
 module.exports = router;
