@@ -4,8 +4,8 @@
 This simple payment system developed to cater for specific needs of cod practice where payment is made during/before delivery of an item. It is basically just a simple payment on web.
 
 ### Integration
-Integrate with Billplz
-Half integrate with STRIPE
+* Integrate with Billplz
+* Half integrate with STRIPE
 
 ### How to use ?
 * First you clone this repo
