@@ -19,7 +19,7 @@ BILLPLZSECRETKEY= <PUT IN YOUR BILLPLZ SECRET KEY HERE >
 BILLPLZCOLLECTIONKEY= <PUT IN YOUR BILLPLZ COLLECTION CODE HERE>
 SYSTEMURL=https://domain.com/ <CONFIGURE YOUR DOMAIN>
 ```
-* Edit ketetapan_ahli/sample.json
+* Edit ketetapan_ahli/sample.json ad save as "username.json" the filename will become your login username
 ```sh
 {"kata_laluan" : "value is just md5 hash text for your password",
 "nama_agent": "is just a string"}
@@ -29,7 +29,7 @@ SYSTEMURL=https://domain.com/ <CONFIGURE YOUR DOMAIN>
 $ node index.js
 ```
 * go to http://yourdomain:3000 or http://localhost:3000
-* go to http://localhost:3000/ahli to login
+* go to http://localhost:3000/ahli to login (username is what you save sample.json above
 * after login you can click on "Cipta" button
 * it will generate a link, you can copy the link
 * open the link in new tab and proceed with payment
