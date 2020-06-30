@@ -38,32 +38,33 @@ body
                       h4 Bayar guna Online Banking - FPX
                       .card-body
                         p.card-text Sila buat pilihan dan tekan 'Teruskan'
-                          form(method='post')
-                            .form-group
-                              label(for='bank') Pilih Bank:
-                              select#bank.form-control(name='bank')
-                                option(value='') ...
-                                option(value='ABB0233') AFFIN Bank
-                                option(value='ABMB0212') ALLIANCE Bank
-                                option(value='AMBB0209') AMB ank
-                                option(value='BIMB0340') Bank Islam
-                                option(value='BKRM0602') Bank Rakyat
-                                option(value='BCBB0235') CIMB Bank
-                                option(value='CIT0217') Citibank
-                                option(value='HLB0224') HONG LEONG Bank
-                                option(value='HSBC0223') HSBC
-                                option(value='MB2U0227') Maybank
-                                option(value='OCBC0229') OCBC
-                                option(value='PBB0233') Public Bank
-                                option(value='RHB0218') RHB
-                                option(value='SCB0216') Standard Chartered
-                                option(value='UOB0226') UOB
-                            button.btn.btn-primary(type='submit') Teruskan
+                        form(method='post')
+                          .form-group
+                            label(for='bank') Pilih Bank:
+                            select#bank.form-control(name='bank')
+                              option(value='') ...
+                              option(value='ABB0233') AFFIN Bank
+                              option(value='ABMB0212') ALLIANCE Bank
+                              option(value='AMBB0209') AMB ank
+                              option(value='BIMB0340') Bank Islam
+                              option(value='BKRM0602') Bank Rakyat
+                              option(value='BCBB0235') CIMB Bank
+                              option(value='CIT0217') Citibank
+                              option(value='HLB0224') HONG LEONG Bank
+                              option(value='HSBC0223') HSBC
+                              option(value='MB2U0227') Maybank
+                              option(value='OCBC0229') OCBC
+                              option(value='PBB0233') Public Bank
+                              option(value='RHB0218') RHB
+                              option(value='SCB0216') Standard Chartered
+                              option(value='UOB0226') UOB
+                          button.btn.btn-primary(type='submit') Teruskan
                 #creditcard.tab-pane.fade(role='tabpanel' aria-labelledby='creditcard-tab')
                   .card
                     .card-header
                       h4 Bayar guna Kad Kredit - Stripe
                       .card-body
+                        p.card-text Sila isi keterangan kad kredit anda dan tekan 'Bayar'
                         form#payment-form
                           #card-element
                           button#submit.ccsubmitbutton
