@@ -80,10 +80,28 @@ router.post('/:bayarid/sudahbayar', urlencodedParser, function(req, res) {
   
 })
 
-router.get('/:bayarid', function(req, res) {
+router.get('/:bayarid', async function(req, res) {
 
   const keterangan_bayaran = dapatkan_keterangan_bayaran(req.params.bayarid)
   const sudah_bayar_flag = keterangan_bayaran.billplz_paid == "true" ? true : false
+
+  //process for stripe
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [{
+      price_data: {
+        currency: 'myr',
+        product_data: {
+          name: keterangan_bayaran.keterangan_barang,
+        },
+        unit_amount: keterangan_bayaran.harga_barang,
+      },
+      quantity: 1,
+    }],
+    mode: 'payment',
+    success_url: url_sistem + "bayar/" + req.params.bayarid + "/terimakasih",
+    cancel_url: url_sistem + "bayar/" + req.params.bayarid,
+  });
 
   data = {
     title: 'Bayar | FGWalet.com',
@@ -94,29 +112,14 @@ router.get('/:bayarid', function(req, res) {
     no_telefon: keterangan_bayaran.no_telefon,
     tarikh_bayaran: keterangan_bayaran.billplz_paid_at,
     nama_agent: keterangan_bayaran.nama_agent,
-    stripe_public_key: stripePK,
     bayar_id: req.params.bayarid,
+    stripe_session_id: session.id,
+    stripe_pk: stripePK,
   }
 
   res.render('bayar', data)
 
 })
-
-router.post("/create-payment-intent", jsonParser, async function(req, res) {
-  const input = req.body;
-  console.log(input)
-
-  const keterangan_bayaran = dapatkan_keterangan_bayaran(input.id)
-
-  // Create a PaymentIntent with the order amount and currency
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: keterangan_bayaran.harga_barang,
-    currency: "myr"
-  });
-  res.send({
-    clientSecret: paymentIntent.client_secret
-  });
-});
 
 router.post('/:bayarid', urlencodedParser, function(req, res) {
 
