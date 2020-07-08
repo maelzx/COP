@@ -36,7 +36,7 @@ body
                     .card-header
                       h4 Bayar guna Online Banking - FPX
                       .card-body
-                        p.card-text Sila buat pilihan dan tekan 'Teruskan'
+                        p.card-text Sila pilih Bank dan tekan 'Teruskan'
                         form(method='post')
                           .form-group
                             label(for='bank') Pilih Bank:
@@ -58,13 +58,21 @@ body
                               option(value='SCB0216') Standard Chartered
                               option(value='UOB0226') UOB
                           button.btn.btn-primary(type='submit') Teruskan
+                          br
+                          hr
+                          p.card-text Dikuasakan Oleh:
+                          img(src='/public/powered-by-billplz.png' alt='BillPlz' style='height: 80px;')
                 #creditcard.tab-pane.fade(role='tabpanel' aria-labelledby='creditcard-tab')
                   .card
                     .card-header
                       h4 Bayar guna Kad Kredit - Stripe
                       .card-body
-                        p.card-text Sila tekan 'Teruskan'
+                        p.card-text Sila tekan 'Teruskan' untuk pembayaran
                         button.btn.btn-primary#checkout-button Teruskan
+                        br
+                        hr
+                        p.card-text Dikuasakan Oleh:
+                        img(src='/public/powered-by-stripe.png' alt='Stripe' style='height: 80px;')
 
             p.card-text
               hr
@@ -73,12 +81,13 @@ body
 script(src='https://code.jquery.com/jquery-3.5.1.slim.min.js' integrity='sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj' crossorigin='anonymous')
 script(src='https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js' integrity='sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo' crossorigin='anonymous')
 script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js' integrity='sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI' crossorigin='anonymous')
-script.
-  var stripe = Stripe("#{stripe_pk}");
-  var checkoutButton = document.getElementById('checkout-button');
-  checkoutButton.addEventListener('click', function() {
-  stripe.redirectToCheckout({
-  sessionId: '#{stripe_session_id}'
-  }).then(function (result) {
-  });
-  });;
+if !sudah_bayar
+  script.
+    var stripe = Stripe("#{stripe_pk}");
+    var checkoutButton = document.getElementById('checkout-button');
+    checkoutButton.addEventListener('click', function() {
+    stripe.redirectToCheckout({
+    sessionId: '#{stripe_session_id}'
+    }).then(function (result) {
+    });
+    });;
