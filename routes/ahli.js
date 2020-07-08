@@ -57,7 +57,7 @@ function log_masuk(kata_nama, kata_laluan) {
 
 router.get('/logmasuk', function(req, res) {
 
-    res.render('ahli_log_masuk', { title: 'Laman Ahli | Team FGWalet KL'})
+    res.render('ahli_log_masuk', { title: 'Laman Ahli | ' + process.env.SYSTEMTITLE})
 
 })
 
@@ -76,7 +76,7 @@ router.post('/logmasuk', urlencodedParser, function(req, res) {
 
     } else {
 
-        res.render('ahli_log_masuk', { title: 'Laman Ahli | Team FGWalet KL', masalah: "Kata Nama atau Kata Laluan tidak betul"})
+        res.render('ahli_log_masuk', { title: 'Laman Ahli | ' + process.env.SYSTEMTITLE, masalah: "Kata Nama atau Kata Laluan tidak betul"})
 
     }
 
@@ -89,7 +89,7 @@ router.get('/', function(req, res) {
     if (req.session.ahli) {
         // sudah log masuk dan masih valid
 
-        res.render('ahli_utama', { title: 'Laman Ahli | Team FGWalet KL', kata_nama: req.session.ahli})
+        res.render('ahli_utama', { title: 'Laman Ahli | ' + process.env.SYSTEMTITLE, kata_nama: req.session.ahli})
 
     } else {
         // tidak log masuk atau sesi sudah tamat
@@ -111,7 +111,7 @@ router.get('/', function(req, res) {
 
 router.get('/cipta', function(req, res) {
 
-    res.render('ahli_cipta', { title: 'Laman Ahli | Team FGWalet KL'})
+    res.render('ahli_cipta', { title: 'Laman Ahli | ' + process.env.SYSTEMTITLE})
 
 })
 
@@ -127,16 +127,17 @@ router.post('/cipta', urlencodedParser, function(req, res) {
         harga_barang: harga_barang * 100,
         nama: nama,
         no_telefon: no_telefon,
-        nama_agent: req.session.nama_agent
+        nama_agent: req.session.nama_agent,
+        nama_ahli: req.session.ahli
     }
 
     const bayarid = cipta_bayar_id(req.session.ahli)
 
     cipta_keterangan_bayaran(bayarid, data)
 
-    const url = "https://fgwalet.com/bayar/" + bayarid
+    const url = process.env.SYSTEMURL + 'bayar/' + bayarid
 
-    res.render('ahli_cipta', { title: 'Laman Ahli | Team FGWalet KL', url: url})
+    res.render('ahli_cipta', { title: 'Laman Ahli | ' + process.env.SYSTEMTITLE, url: url})
 
 })
 
