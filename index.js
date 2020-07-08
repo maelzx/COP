@@ -17,5 +17,6 @@ app.use("/public", express.static('public'));
 app.use('/bayar', require('./routes/bayar'))
 app.use('/ahli', require('./routes/ahli'))
 app.use('/', require('./routes/main'))
+app.use('/webhook', require('./routes/webhook'))
 
 app.listen(port, () => console.log(`App listening at http://localhost:${port}`))

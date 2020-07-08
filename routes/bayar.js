@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const router = express.Router();
 const path = require('path');
 const jsonfile = require('jsonfile')
+const axios = require('axios')
 
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const jsonParser = bodyParser.json()
@@ -16,6 +17,17 @@ const url_sistem = process.env.SYSTEMURL
 const stripe = require("stripe")(process.env.STRIPESECRETKEY);
 const stripePK = process.env.STRIPEPUBLICKEY
 
+const Telegrambot = require("../modul/telegrambot.js")
+const telegrambot = new Telegrambot(process.env.TGBOTKEY, process.env.TGBOTAPIURL, axios)
+
+function dapatkan_keterangan_ahli(nama_ahli) {
+
+  const lokasi_ketetapan = path.join(__dirname, '..', process.env.NAMADIREKTORIAHLI)
+  const file = lokasi_ketetapan + '/' + nama_ahli + '.json'
+
+  return jsonfile.readFileSync(file)
+
+}
 
 function dapatkan_keterangan_bayaran(bayarid) {
 
@@ -35,13 +47,30 @@ function kemaskini_keterangan_bayaran(bayarid, data) {
 
 }
 
+function cipta_keterangan_bayaran_stripe(stripe_pi_id, data) {
+
+  const lokasi_ketetapan = path.join(__dirname, '..', process.env.NAMADIREKTORISTRIPE)
+  const file = lokasi_ketetapan + '/' + stripe_pi_id + '.json'
+ 
+  jsonfile.writeFileSync(file, data)
+
+}
+
 router.get('/:bayarid/terimakasih', function(req, res) {
 
   const keterangan_bayaran = dapatkan_keterangan_bayaran(req.params.bayarid)
+  const billplz_flag = false
 
-  const sudah_bayar_flag = req.query.billplz.paid == 'true' ? true : false
+  try {
+    if (req.query.billplz.paid == 'true') {
+      console.log('this coming from billplz')
+      billplz_flag = true
+    }
+  } catch (error) {
+    console.log('maybe this coming from stripe')
+  }
 
-  if (sudah_bayar_flag) {
+  if (billplz_flag) {
 
     keterangan_bayaran.billplz_paid = "true"
 
@@ -50,10 +79,10 @@ router.get('/:bayarid/terimakasih', function(req, res) {
   }
 
   data = {
-    title: 'Bayar | FGWalet.com',
+    title: 'Bayar | ' + process.env.SYSTEMTITLE,
     keterangan: keterangan_bayaran.keterangan_barang,
     harga: (keterangan_bayaran.harga_barang/100).toFixed(2),
-    sudah_bayar: sudah_bayar_flag,
+    sudah_bayar: true,
     nama: keterangan_bayaran.nama,
     no_telefon: keterangan_bayaran.no_telefon,
     nama_agent: keterangan_bayaran.nama_agent
@@ -66,6 +95,7 @@ router.get('/:bayarid/terimakasih', function(req, res) {
 router.post('/:bayarid/sudahbayar', urlencodedParser, function(req, res) {
 
   const keterangan_bayaran = dapatkan_keterangan_bayaran(req.params.bayarid)
+  const keterangan_ahli = dapatkan_keterangan_ahli(keterangan_bayaran.nama_ahli)
 
   const billplz_paid = req.body.paid
   const billplz_state = req.body.state
@@ -76,6 +106,8 @@ router.post('/:bayarid/sudahbayar', urlencodedParser, function(req, res) {
 
   kemaskini_keterangan_bayaran(req.params.bayarid, keterangan_bayaran)
 
+  telegrambot.sendMessage("@" + keterangan_ahli.telegram_username + " " + keterangan_bayaran.nama + " telah membuat bayaran berjumlah RM" + (keterangan_bayaran.harga_barang/100).toFixed(2), process.env.TGBOTCHANNELID)
+
   res.send()
   
 })
@@ -83,28 +115,41 @@ router.post('/:bayarid/sudahbayar', urlencodedParser, function(req, res) {
 router.get('/:bayarid', async function(req, res) {
 
   const keterangan_bayaran = dapatkan_keterangan_bayaran(req.params.bayarid)
-  const sudah_bayar_flag = keterangan_bayaran.billplz_paid == "true" ? true : false
+  var sudah_bayar_flag = keterangan_bayaran.billplz_paid == "true" ? true : false
+  const stripe_bayar_flag = keterangan_bayaran.stripe_paid == "true" ? true : false
 
-  //process for stripe
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: [{
-      price_data: {
-        currency: 'myr',
-        product_data: {
-          name: keterangan_bayaran.keterangan_barang,
+  let session = {}
+
+  if (!sudah_bayar_flag && !stripe_bayar_flag) {
+
+    //process for stripe
+    session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'myr',
+          product_data: {
+            name: keterangan_bayaran.keterangan_barang,
+          },
+          unit_amount: keterangan_bayaran.harga_barang,
         },
-        unit_amount: keterangan_bayaran.harga_barang,
-      },
-      quantity: 1,
-    }],
-    mode: 'payment',
-    success_url: url_sistem + "bayar/" + req.params.bayarid + "/terimakasih",
-    cancel_url: url_sistem + "bayar/" + req.params.bayarid,
-  });
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: url_sistem + "bayar/" + req.params.bayarid + "/terimakasih",
+      cancel_url: url_sistem + "bayar/" + req.params.bayarid,
+    });
+
+    cipta_keterangan_bayaran_stripe(session.payment_intent, {"bayar_id": req.params.bayarid})
+
+  } else {
+    session = {id: 0}
+    sudah_bayar_flag = true
+  }
+  
 
   data = {
-    title: 'Bayar | FGWalet.com',
+    title: 'Bayar | ' + process.env.SYSTEMTITLE,
     keterangan: keterangan_bayaran.keterangan_barang,
     harga: (keterangan_bayaran.harga_barang/100).toFixed(2),
     sudah_bayar: sudah_bayar_flag,
