@@ -5,7 +5,7 @@ This simple payment system developed to cater for specific needs of cod practice
 
 ### Integration
 * Integrate with Billplz
-* Half integrate with STRIPE
+* Integrate with Stripe Checkout
 
 ### How to use ?
 * First you clone this repo
@@ -39,4 +39,3 @@ $ node index.js
 * To add listing of url created
 * To add in proper setting of sitting behind nginx proxy
 * To properly handle and check for correct phone number
-* Implement webhook verification for STRIPE
