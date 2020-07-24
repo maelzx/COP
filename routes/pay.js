@@ -21,6 +21,7 @@ const Telegrambot = require("../modul/telegrambot.js")
 const telegrambot = new Telegrambot(process.env.TGBOTKEY, process.env.TGBOTAPIURL, axios)
 
 const page_main_title = "Payment"
+const form_main_title = "Team FG Walet KL"
 
 function get_member_config(username) {
 
@@ -85,7 +86,8 @@ router.get('/:payid/thankyou', function(req, res) {
     paid_flag: true,
     name: payment_config.name,
     phone_no : payment_config.phone_no,
-    agent_name: payment_config.agent_name
+    agent_name: payment_config.agent_name,
+    form_name: form_main_title
   }
 
   res.render('pay', data)
@@ -122,25 +124,29 @@ router.get('/:payid', async function(req, res) {
 
   if (!paid_flag && !stripe_paid_flag) {
 
-    //process for stripe
-    session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'myr',
-          product_data: {
-            name: payment_config.keterangan_barang,
+    if (payment_config.cc_enable == "true") {
+      //process for stripe
+      session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [{
+          price_data: {
+            currency: 'myr',
+            product_data: {
+              name: payment_config.keterangan_barang,
+            },
+            unit_amount: payment_config.harga_barang,
           },
-          unit_amount: payment_config.harga_barang,
-        },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      success_url: url_sistem + "pay/" + req.params.payid + "/thankyou",
-      cancel_url: url_sistem + "pay/" + req.params.payid,
-    });
+          quantity: 1,
+        }],
+        mode: 'payment',
+        success_url: url_sistem + "pay/" + req.params.payid + "/thankyou",
+        cancel_url: url_sistem + "pay/" + req.params.payid,
+      });
 
-    create_stripe_payment_config(session.payment_intent, {"payid": req.params.payid})
+      create_stripe_payment_config(session.payment_intent, {"payid": req.params.payid})
+    }
+
+    
 
   } else {
     session = {id: 0}
@@ -160,6 +166,8 @@ router.get('/:payid', async function(req, res) {
     payid: req.params.payid,
     stripe_session_id: session.id,
     stripe_pk: stripePK,
+    form_name: form_main_title,
+    cc_enable: payment_config.cc_enable == "true" ? true : false
   }
 
   res.render('pay', data)

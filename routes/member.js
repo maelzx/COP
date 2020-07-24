@@ -8,6 +8,7 @@ const crypto = require('crypto')
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 const page_main_title = "Member Page"
+const form_main_title = "Team FG Walet KL"
 
 function get_member_config(username) {
 
@@ -59,7 +60,10 @@ function login(username, password) {
 
 router.get('/login', function(req, res) {
 
-    res.render('member_login', { title: page_main_title + ' | ' + process.env.SYSTEMTITLE})
+    res.render('member_login', {
+        title: page_main_title + ' | ' + process.env.SYSTEMTITLE,
+        form_name: form_main_title
+    })
 
 })
 
@@ -79,7 +83,11 @@ router.post('/login', urlencodedParser, function(req, res) {
 
     } else {
 
-        res.render('member_login', { title: page_main_title + ' | ' + process.env.SYSTEMTITLE, problem: "Username or Password is incorrect"})
+        res.render('member_login', {
+            title: page_main_title + ' | ' + process.env.SYSTEMTITLE, 
+            problem: "Username or Password is incorrect",
+            form_name: form_main_title
+        })
 
     }
 
@@ -92,7 +100,11 @@ router.get('/', function(req, res) {
     if (req.session.username) {
         // logged in and session is valid
 
-        res.render('member_main', { title: page_main_title + ' | ' + process.env.SYSTEMTITLE, username: req.session.username})
+        res.render('member_main', {
+            title: page_main_title + ' | ' + process.env.SYSTEMTITLE, 
+            username: req.session.username,
+            form_name: form_main_title
+        })
 
     } else {
         // not logged in or session expired
@@ -114,7 +126,10 @@ router.get('/', function(req, res) {
 
 router.get('/create', function(req, res) {
 
-    res.render('member_create', { title: page_main_title + ' | ' + process.env.SYSTEMTITLE})
+    res.render('member_create', {
+        title: page_main_title + ' | ' + process.env.SYSTEMTITLE,
+        form_name: form_main_title
+    })
 
 })
 
@@ -125,6 +140,7 @@ router.post('/create', urlencodedParser, function(req, res) {
     const name = req.body.name
     const phone_no = req.body.phone_no
     const email = req.body.email
+    const cc_enable = req.body.cc_enable
 
     const data = {
         item_description: item_description,
@@ -134,7 +150,8 @@ router.post('/create', urlencodedParser, function(req, res) {
         email: email,
         agent_name: req.session.agent_name,
         username: req.session.username,
-        seller_email: req.session.email
+        seller_email: req.session.email,
+        cc_enable: cc_enable
     }
 
     const payid = create_payid(req.session.username)
@@ -143,7 +160,10 @@ router.post('/create', urlencodedParser, function(req, res) {
 
     const url = process.env.SYSTEMURL + 'pay/' + payid
 
-    res.render('member_create', { title: page_main_title + ' | ' + process.env.SYSTEMTITLE, url: url})
+    res.render('member_create', {
+        title: page_main_title + ' | ' + process.env.SYSTEMTITLE, url: url,
+        form_name: form_main_title
+    })
 
 })
 
