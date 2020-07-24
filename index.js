@@ -14,6 +14,8 @@ app.use(cookie_session({
 
 app.use("/public", express.static('public')); 
 
+app.use('/member', require('./routes/member'))
+app.use('/pay', require('./routes/pay'))
 app.use('/bayar', require('./routes/bayar'))
 app.use('/ahli', require('./routes/ahli'))
 app.use('/', require('./routes/main'))
