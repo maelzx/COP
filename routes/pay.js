@@ -189,8 +189,8 @@ router.post('/:payid', urlencodedParser, function(req, res) {
         'amount': payment_config.item_price,
         'reference_1_label': "Bank Code",
         'reference_1': req.body.bank,
-        'callback_url': url_sistem + "pay/" + req.params.bayarid + "/paid",
-        'redirect_url': url_sistem + "pay/" + req.params.bayarid + "/thankyou"
+        'callback_url': url_sistem + "pay/" + req.params.payid + "/paid",
+        'redirect_url': url_sistem + "pay/" + req.params.payid + "/thankyou"
     }
 
     // handling when no mobile phone number given
