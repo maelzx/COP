@@ -62,7 +62,7 @@ function create_stripe_payment_config(stripe_pi_id, data) {
 router.get('/:payid/thankyou', function(req, res) {
 
   const payment_config = get_payment_config(req.params.payid)
-  const billplz_flag = false
+  let billplz_flag = false
 
   try {
     if (req.query.billplz.paid == 'true') {
@@ -84,6 +84,7 @@ router.get('/:payid/thankyou', function(req, res) {
     description: payment_config.item_description,
     price: (payment_config.item_price/100).toFixed(2),
     paid_flag: true,
+    paid_at: '[in processing...]',
     name: payment_config.name,
     phone_no : payment_config.phone_no,
     agent_name: payment_config.agent_name,
@@ -97,7 +98,7 @@ router.get('/:payid/thankyou', function(req, res) {
 router.post('/:payid/paid', urlencodedParser, function(req, res) {
 
   const payment_config = get_payment_config(req.params.payid)
-  const member_config = get_member_config(keterangan_bayaran.username)
+  const member_config = get_member_config(payment_config.username)
 
   const billplz_paid = req.body.paid
   const billplz_state = req.body.state
@@ -132,9 +133,9 @@ router.get('/:payid', async function(req, res) {
           price_data: {
             currency: 'myr',
             product_data: {
-              name: payment_config.keterangan_barang,
+              name: payment_config.item_description,
             },
-            unit_amount: payment_config.harga_barang,
+            unit_amount: payment_config.item_price,
           },
           quantity: 1,
         }],
@@ -180,7 +181,7 @@ router.post('/:payid', urlencodedParser, function(req, res) {
     const phone_no = payment_config.phone_no
     const name = payment_config.name
 
-    const billplz_object = {
+    let billplz_object = {
         'collection_id': billplz_collection,
         'description': payment_config.item_description,
         'mobile': phone_no,
@@ -194,7 +195,7 @@ router.post('/:payid', urlencodedParser, function(req, res) {
 
     // handling when no mobile phone number given
     // just put in seller own email
-    if (phone_no = '') {
+    if (phone_no == '') {
         delete billplz_object['mobile']
         billplz_object.email = payment_config.seller_email
     }
