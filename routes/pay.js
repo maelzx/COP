@@ -125,7 +125,7 @@ router.get('/:payid', async function(req, res) {
   const payment_config = get_payment_config(req.params.payid)
   var paid_flag = payment_config.billplz_paid == "true" ? true : false
   const stripe_paid_flag = payment_config.stripe_paid == "true" ? true : false
-  const stripe_amount = payment_config.item_price
+  let stripe_amount = payment_config.item_price
 
   let session = {}
 
