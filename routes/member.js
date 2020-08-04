@@ -141,6 +141,7 @@ router.post('/create', urlencodedParser, function(req, res) {
     const phone_no = req.body.phone_no
     const email = req.body.email
     const cc_enable = req.body.cc_enable
+    const cc_charge_extra = req.body.cc_charge_extra
 
     const data = {
         item_description: item_description,
@@ -151,7 +152,8 @@ router.post('/create', urlencodedParser, function(req, res) {
         agent_name: req.session.agent_name,
         username: req.session.username,
         seller_email: req.session.email,
-        cc_enable: cc_enable
+        cc_enable: cc_enable,
+        cc_charge_extra: cc_charge_extra
     }
 
     const payid = create_payid(req.session.username)

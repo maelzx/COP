@@ -100,16 +100,21 @@ router.post('/:payid/paid', urlencodedParser, function(req, res) {
   const payment_config = get_payment_config(req.params.payid)
   const member_config = get_member_config(payment_config.username)
 
-  const billplz_paid = req.body.paid
-  const billplz_state = req.body.state
-  const billplz_paid_at = req.body.paid_at
-  payment_config.billplz_paid = billplz_paid
-  payment_config.billplz_state = billplz_state
-  payment_config.billplz_paid_at = billplz_paid_at
+  if (req.body.paid == "true") {
+    const billplz_paid = req.body.paid
+    const billplz_state = req.body.state
+    const billplz_paid_at = req.body.paid_at
+    payment_config.billplz_paid = billplz_paid
+    payment_config.billplz_state = billplz_state
+    payment_config.billplz_paid_at = billplz_paid_at
 
-  update_payment_config(req.params.payid, payment_config)
-
-  telegrambot.sendMessage("@" + member_config.telegram_username + " " + payment_config.name + " make a payment with amount RM" + (payment_config.item_price/100).toFixed(2) + " via Billplz", process.env.TGBOTCHANNELID)
+    update_payment_config(req.params.payid, payment_config)
+  
+    let message = "@" + member_config.telegram_username
+    message += " " + payment_config.name + " make a payment with amount RM" + (payment_config.item_price/100).toFixed(2)
+    message += " via Billplz. Link: " + req.body.url
+    telegrambot.sendMessage(message, process.env.TGBOTCHANNELID)
+  }
 
   res.send()
   
@@ -120,12 +125,18 @@ router.get('/:payid', async function(req, res) {
   const payment_config = get_payment_config(req.params.payid)
   var paid_flag = payment_config.billplz_paid == "true" ? true : false
   const stripe_paid_flag = payment_config.stripe_paid == "true" ? true : false
+  const stripe_amount = payment_config.item_price
 
   let session = {}
 
   if (!paid_flag && !stripe_paid_flag) {
 
     if (payment_config.cc_enable == "true") {
+
+      if (payment_config.cc_charge_extra == "true") {
+        stripe_amount = Math.round(payment_config.item_price / (1 - (3/100)))
+      }
+
       //process for stripe
       session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -135,7 +146,7 @@ router.get('/:payid', async function(req, res) {
             product_data: {
               name: payment_config.item_description,
             },
-            unit_amount: payment_config.item_price,
+            unit_amount: stripe_amount,
           },
           quantity: 1,
         }],
@@ -159,6 +170,7 @@ router.get('/:payid', async function(req, res) {
     title: page_main_title + ' | ' + process.env.SYSTEMTITLE,
     description: payment_config.item_description,
     price: (payment_config.item_price/100).toFixed(2),
+    stripe_amount: (stripe_amount/100).toFixed(2),
     paid_flag: paid_flag,
     name: payment_config.name,
     phone_no: payment_config.phone_no,
@@ -168,7 +180,8 @@ router.get('/:payid', async function(req, res) {
     stripe_session_id: session.id,
     stripe_pk: stripePK,
     form_name: form_main_title,
-    cc_enable: payment_config.cc_enable == "true" ? true : false
+    cc_enable: payment_config.cc_enable == "true" ? true : false,
+    cc_charge_extra: payment_config.cc_charge_extra == "true" ? true : false
   }
 
   res.render('pay', data)

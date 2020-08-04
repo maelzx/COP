@@ -45,14 +45,14 @@ body
                             label(for='bank') Choose Bank:
                             select#bank.form-control(name='bank')
                               option(value='') ...
-                              option(value='ABB0233') AFFIN Bank
-                              option(value='ABMB0212') ALLIANCE Bank
+                              option(value='ABB0233') Affin Bank
+                              option(value='ABMB0212') Alliance Bank
                               option(value='AMBB0209') AMBank
                               option(value='BIMB0340') Bank Islam
                               option(value='BKRM0602') Bank Rakyat
                               option(value='BCBB0235') CIMB Bank
                               option(value='CIT0217') Citibank
-                              option(value='HLB0224') HONG LEONG Bank
+                              option(value='HLB0224') Hong Leong Bank
                               option(value='HSBC0223') HSBC
                               option(value='MB2U0227') Maybank
                               option(value='OCBC0229') OCBC
@@ -72,6 +72,8 @@ body
                         h4 Pay by Credit Card - Stripe
                         .card-body
                           p.card-text Please Proceed to make payment
+                          if cc_charge_extra
+                            p.card-text For credit card you will be charge a total amount of: RM #{stripe_amount}
                           button.btn.btn-primary#checkout-button Proceed
                           br
                           hr
