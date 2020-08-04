@@ -126,6 +126,7 @@ router.get('/:payid', async function(req, res) {
   var paid_flag = payment_config.billplz_paid == "true" ? true : false
   const stripe_paid_flag = payment_config.stripe_paid == "true" ? true : false
   let stripe_amount = payment_config.item_price
+  let paid_at = payment_config.billplz_paid_at
 
   let session = {}
 
@@ -164,6 +165,11 @@ router.get('/:payid', async function(req, res) {
     session = {id: 0}
     paid_flag = true
   }
+
+  if (stripe_paid_flag) {
+    var ts = new Date(payment_config.stripe_created*1000)
+    paid_at = ts.toLocaleString()
+  }
   
 
   data = {
@@ -174,7 +180,7 @@ router.get('/:payid', async function(req, res) {
     paid_flag: paid_flag,
     name: payment_config.name,
     phone_no: payment_config.phone_no,
-    paid_at: payment_config.billplz_paid_at,
+    paid_at: paid_at,
     agent_name: payment_config.agent_name,
     payid: req.params.payid,
     stripe_session_id: session.id,
