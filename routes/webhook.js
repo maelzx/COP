@@ -69,8 +69,12 @@ router.post('/stripe', jsonParser, async function(req, res) {
             payment_config.stripe_created = paymentIntent.created
 
             update_payment_config(stripe_details.payid, payment_config)
+            let amount_paid = payment_config.item_price
+            if (payment_config.cc_charge_extra == "true") {
+              amount_paid = Math.round(payment_config.item_price / (1 - (3/100)))
+            }
 
-            telegrambot.sendMessage("@" + member_config.telegram_username + " " + payment_config.name + " make a payment with amount RM" + (payment_config.item_price/100).toFixed(2) + " via Stripe", process.env.TGBOTCHANNELID)
+            telegrambot.sendMessage("@" + member_config.telegram_username + " " + payment_config.name + " make a payment with amount RM" + (amount_paid/100).toFixed(2) + " via Stripe", process.env.TGBOTCHANNELID)
 
             break;
         default:
