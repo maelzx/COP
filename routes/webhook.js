@@ -13,37 +13,37 @@ const Telegrambot = require("../modul/telegrambot.js")
 
 const telegrambot = new Telegrambot(process.env.TGBOTKEY, process.env.TGBOTAPIURL, axios)
 
-function dapatkan_keterangan_ahli(nama_ahli) {
+function get_member_config(username) {
 
-    const lokasi_ketetapan = path.join(__dirname, '..', process.env.NAMADIREKTORIAHLI)
-    const file = lokasi_ketetapan + '/' + nama_ahli + '.json'
+    const file_location = path.join(__dirname, '..', process.env.USERCONFIGDIR)
+    const file = file_location + '/' + username + '.json'
   
     return jsonfile.readFileSync(file)
   
   }
 
-  function dapatkan_keterangan_bayaran(bayarid) {
+  function get_payment_config(payid) {
 
-    const lokasi_ketetapan = path.join(__dirname, '..', process.env.NAMADIREKTORIBAYARAN)
-    const file = lokasi_ketetapan + '/' + bayarid + '.json'
+    const file_location = path.join(__dirname, '..', process.env.PAYMENTCONFIGDIR)
+    const file = file_location + '/' + payid + '.json'
   
     return jsonfile.readFileSync(file)
   
   }
 
-  function kemaskini_keterangan_bayaran(bayarid, data) {
+  function update_payment_config(payid, data) {
 
-    const lokasi_ketetapan = path.join(__dirname, '..', process.env.NAMADIREKTORIBAYARAN)
-    const file = lokasi_ketetapan + '/' + bayarid + '.json'
+    const file_location = path.join(__dirname, '..', process.env.PAYMENTCONFIGDIR)
+    const file = file_location + '/' + payid + '.json'
    
     jsonfile.writeFileSync(file, data)
   
   }
 
-  function dapatkan_keterangan_stripe(stripe_id) {
+  function get_stripe_config(stripe_id) {
 
-    const lokasi_ketetapan = path.join(__dirname, '..', process.env.NAMADIREKTORISTRIPE)
-    const file = lokasi_ketetapan + '/' + stripe_id + '.json'
+    const file_location = path.join(__dirname, '..', process.env.STRIPEPAYMENTCONFIGDIR)
+    const file = file_location + '/' + stripe_id + '.json'
   
     return jsonfile.readFileSync(file)
   
@@ -60,19 +60,17 @@ router.post('/stripe', jsonParser, async function(req, res) {
         case 'payment_intent.succeeded':
             const paymentIntent = event.data.object;
 
-            const keterangan_stripe = dapatkan_keterangan_stripe(paymentIntent.id)
-            const keterangan_bayaran = dapatkan_keterangan_bayaran(keterangan_stripe.bayar_id)
-            const keterangan_ahli = dapatkan_keterangan_ahli(keterangan_bayaran.nama_ahli)
+            const stripe_details = get_stripe_config(paymentIntent.id)
+            const payment_config = get_payment_config(stripe_details.payid)
+            const member_config = get_member_config(payment_config.username)
 
-            keterangan_bayaran.stripe_paid = "true"
-            keterangan_bayaran.stripe_status = paymentIntent.status
-            keterangan_bayaran.stripe_created = paymentIntent.created
+            payment_config.stripe_paid = "true"
+            payment_config.stripe_status = paymentIntent.status
+            payment_config.stripe_created = paymentIntent.created
 
-            kemaskini_keterangan_bayaran(keterangan_stripe.bayar_id, keterangan_bayaran)
+            update_payment_config(stripe_details.payid, payment_config)
 
-            telegrambot.sendMessage("@" + keterangan_ahli.telegram_username + " " + keterangan_bayaran.nama + " telah membuat bayaran berjumlah RM" + (keterangan_bayaran.harga_barang/100).toFixed(2), process.env.TGBOTCHANNELID)
-
-            console.log('PaymentIntent was successful!');
+            telegrambot.sendMessage("@" + member_config.telegram_username + " " + payment_config.name + " make a payment with amount RM" + (payment_config.item_price/100).toFixed(2) + " via Stripe", process.env.TGBOTCHANNELID)
 
             break;
         default:
