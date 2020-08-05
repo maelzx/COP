@@ -17,6 +17,28 @@ const getdata = new Getdata()
 
 const api_secret_key = process.env.APISECRETKEY
 
+function login(username, password) {
+
+    const member_config = getdata.getUser(username)
+
+    if (member_config) {
+
+        let hash = crypto.createHash('md5').update(password).digest("hex")
+
+        if (member_config.password = hash) {
+            return true
+        } else {
+            // login unsuccessful
+            return false
+        }
+
+    } else {
+        // login unsuccessful
+        return false
+    }
+
+}
+
 function create_token(username) {
 
     const random_number = Math.floor(Math.random() * 10000)
@@ -37,9 +59,9 @@ function verify_token(username, number, hash) {
 
 function check_token(token) {
 
-    const {username, number, hash} = token.split(":")
+    const tokenSplit = token.split(":")
 
-    if (verify_token(username, number, hash)) {
+    if (verify_token(tokenSplit[0], tokenSplit[1], tokenSplit[2])) {
 
         return true
     }
@@ -78,8 +100,8 @@ router.post('/authenticate', jsonParser, async function(req, res) {
 router.post('/create', jsonParser, async function(req, res) {
 
     const buyerName = req.body.buyerName
-    const buyerName = req.body.buyerPhoneNo
-    const buyerName = req.body.buyerEmail
+    const buyerPhoneNo = req.body.buyerPhoneNo
+    const buyerEmail = req.body.buyerEmail
     const itemDescription = req.body.itemDescription
     const itemPrice = req.body.itemPrice
     const ccEnable = req.body.ccEnable
@@ -90,7 +112,8 @@ router.post('/create', jsonParser, async function(req, res) {
         res.json({"error": "token not valid"})
     }
 
-    const {username, number, hash} = token.split(":")
+    const tokenSplit = token.split(":")
+    const username = tokenSplit[0]
 
     const member_config = getdata.getUser(username)
 
@@ -101,13 +124,13 @@ router.post('/create', jsonParser, async function(req, res) {
         phone_no: buyerPhoneNo,
         email: buyerEmail,
         agent_name: member_config.agent_name,
-        username: member_config.username,
+        username: username,
         seller_email: member_config.email,
         cc_enable: ccEnable,
         cc_charge_extra: ccExtraCharge
     }
 
-    const payid = create_payid(member_config.username)
+    const payid = create_payid(username)
 
     getdata.setPayment(payid, data)
 
