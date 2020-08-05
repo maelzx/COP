@@ -44,7 +44,7 @@ function login(username, password) {
 
         let hash = crypto.createHash('md5').update(password).digest("hex")
 
-        if (member_config.password = hash) {
+        if (member_config.password == hash) {
             return true
         } else {
             // login unsuccessful
