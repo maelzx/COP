@@ -5,6 +5,7 @@ class Getdata {
         this.PAYMENTCONFIGDIR = process.env.PAYMENTCONFIGDIR
         this.STRIPEPAYMENTCONFIGDIR = process.env.STRIPEPAYMENTCONFIGDIR
         this.jsonfile = require('jsonfile')
+        this.path = require('path');
     }
 
     getData(type, key) {
@@ -26,7 +27,7 @@ class Getdata {
 
         }
 
-        const file_location = path.join(__dirname, '..', path)
+        const file_location = this.path.join(__dirname, '..', path)
         const file = file_location + '/' + key + '.json'
   
         return this.jsonfile.readFileSync(file)
@@ -51,7 +52,7 @@ class Getdata {
 
         }
 
-        const file_location = path.join(__dirname, '..', path)
+        const file_location = this.path.join(__dirname, '..', path)
         const file = file_location + '/' + id + '.json'
        
         this.jsonfile.writeFileSync(file, data)
