@@ -1,4 +1,4 @@
-class Getdata {
+class Data {
 
     constructor () {
         this.USERCONFIGDIR = process.env.USERCONFIGDIR
@@ -80,4 +80,4 @@ class Getdata {
 
 }
 
-module.exports = Getdata
+module.exports = Data
