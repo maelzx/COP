@@ -1,31 +1,30 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const router = express.Router();
-const path = require('path');
-const jsonfile = require('jsonfile')
 const crypto = require('crypto')
 const axios = require('axios')
+const jwt = require('jsonwebtoken')
 
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const jsonParser = bodyParser.json()
 
 const Telegrambot = require("../modul/telegrambot.js")
-const Getdata = require("../modul/getdata.js")
+const Data = require("../modul/data.js")
 
 const telegrambot = new Telegrambot(process.env.TGBOTKEY, process.env.TGBOTAPIURL, axios)
-const getdata = new Getdata()
+const data = new Data()
 
 const api_secret_key = process.env.APISECRETKEY
 
 function login(username, password) {
 
-    const member_config = getdata.getUser(username)
+    const member_config = data.getUser(username)
 
     if (member_config) {
 
-        let hash = crypto.createHash('md5').update(password).digest("hex")
+        const hash = crypto.createHash('md5').update(password).digest("hex")
 
-        if (member_config.password = hash) {
+        if (member_config.password == hash) {
             return true
         } else {
             // login unsuccessful
@@ -41,32 +40,23 @@ function login(username, password) {
 
 function create_token(username) {
 
-    const random_number = Math.floor(Math.random() * 10000)
-
-    let hash = crypto.createHash('md5').update(username + api_secret_key + random_number).digest("hex")
+    var token = jwt.sign({ username: username }, api_secret_key, { expiresIn: '24h' });
     
-    return random_number + ":" + hash
-
-}
-
-function verify_token(username, number, hash) {
-
-    let hash_temp = crypto.createHash('md5').update(username + api_secret_key + number).digest("hex")
-
-    return hash == hash_temp
+    return token
 
 }
 
 function check_token(token) {
 
-    const tokenSplit = token.split(":")
+    let decoded = false
 
-    if (verify_token(tokenSplit[0], tokenSplit[1], tokenSplit[2])) {
-
-        return true
+    try {
+        decoded = jwt.verify(token, api_secret_key);
+    } catch(err) {
+        return decoded
     }
 
-    return false
+    return decoded
 
 }
 
@@ -83,15 +73,13 @@ router.post('/authenticate', jsonParser, async function(req, res) {
     const username = req.body.username
     const password = req.body.password
 
-    const member_config = getdata.getUser(username)
-
     if (login(username, password)) {
 
-        res.json({"token": username + ":" + create_token(username)})
+        res.json({"token": create_token(username)})
 
     } else {
-
-        res.json({"error": "not valid"})
+        res.statusCode = 400
+        res.json({"error": "identity not valid"})
 
     }
 
@@ -106,18 +94,22 @@ router.post('/create', jsonParser, async function(req, res) {
     const itemPrice = req.body.itemPrice
     const ccEnable = req.body.ccEnable
     const ccExtraCharge = req.body.ccExtraCharge
-    const token = req.body.token
+    const token = req.header('x-token') 
+    let username = ''
 
-    if (!check_token(token)) {
+    tokenDecoded = check_token(token)
+
+    if (!tokenDecoded) {
+        res.statusCode = 401
         res.json({"error": "token not valid"})
+        return
+    } else {
+        username = tokenDecoded.username
     }
 
-    const tokenSplit = token.split(":")
-    const username = tokenSplit[0]
+    const member_config = data.getUser(username)
 
-    const member_config = getdata.getUser(username)
-
-    const data = {
+    const paymentData = {
         item_description: itemDescription,
         item_price: itemPrice * 100,
         name: buyerName,
@@ -132,15 +124,13 @@ router.post('/create', jsonParser, async function(req, res) {
 
     const payid = create_payid(username)
 
-    getdata.setPayment(payid, data)
+    data.setPayment(payid, paymentData)
 
     const url = process.env.SYSTEMURL + 'pay/' + payid
 
     res.json({"paymentLinkUrl": url})
 
 })
-
-
 
 //Return router
 module.exports = router
