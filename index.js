@@ -18,7 +18,9 @@ app.use('/member', require('./routes/member'))
 app.use('/pay', require('./routes/pay'))
 app.use('/bayar', require('./routes/bayar'))
 app.use('/ahli', require('./routes/ahli'))
-app.use('/', require('./routes/main'))
 app.use('/webhook', require('./routes/webhook'))
+app.use('/api', require('./routes/api'))
+app.use('/', require('./routes/main'))
+
 
 app.listen(port, () => console.log(`App listening at http://localhost:${port}`))
