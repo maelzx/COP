@@ -1,5 +1,5 @@
 ```
-![Visitor Count](https://profile-counter.glitch.me/{YOUR USER}/count.svg)
+[![Visits Badge](https://badges.pufler.dev/visits/maelzx/git-badges)](https://badges.pufler.dev)
 ```
 
 # COP - (COD Online Payment Link)
