@@ -4,29 +4,13 @@ const router = express.Router();
 const path = require('path');
 const jsonfile = require('jsonfile')
 const crypto = require('crypto')
+const Data = require("../modul/data.js")
+const data = new Data()
 
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 const page_main_title = "Member Page"
 const form_main_title = "Team FG Walet KL"
-
-function get_member_config(username) {
-
-    const file_location = path.join(__dirname, '..', process.env.USERCONFIGDIR)
-    const file = file_location + '/' + username + '.json'
-  
-    return jsonfile.readFileSync(file)
-  
-  }
-
-function create_payment_config(payid, data) {
-
-    const file_location = path.join(__dirname, '..', process.env.PAYMENTCONFIGDIR)
-    const file = file_location + '/' + payid + '.json'
-   
-    jsonfile.writeFileSync(file, data)
-  
-  }
 
 function create_payid(username) {
 
@@ -38,7 +22,7 @@ function create_payid(username) {
 
 function login(username, password) {
 
-    const member_config = get_member_config(username)
+    const member_config = data.getUser(username)
 
     if (member_config) {
 
@@ -72,7 +56,7 @@ router.post('/login', urlencodedParser, function(req, res) {
     const username = req.body.username
     const password = req.body.password
 
-    const member_config = get_member_config(username)
+    const member_config = data.getUser(username)
 
     if (login(username, password)) {
 
@@ -143,7 +127,7 @@ router.post('/create', urlencodedParser, function(req, res) {
     const cc_enable = req.body.cc_enable
     const cc_charge_extra = req.body.cc_charge_extra
 
-    const data = {
+    const paymentData = {
         item_description: item_description,
         item_price: item_price * 100,
         name: name,
@@ -158,7 +142,7 @@ router.post('/create', urlencodedParser, function(req, res) {
 
     const payid = create_payid(req.session.username)
 
-    create_payment_config(payid, data)
+    data.setPayment(payid, paymentData)
 
     const url = process.env.SYSTEMURL + 'pay/' + payid
 

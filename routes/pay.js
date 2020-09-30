@@ -4,6 +4,8 @@ const router = express.Router();
 const path = require('path');
 const jsonfile = require('jsonfile')
 const axios = require('axios')
+const Data = require("../modul/data.js")
+const data = new Data()
 
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const jsonParser = bodyParser.json()
@@ -23,45 +25,9 @@ const telegrambot = new Telegrambot(process.env.TGBOTKEY, process.env.TGBOTAPIUR
 const page_main_title = "Payment"
 const form_main_title = "Team FG Walet KL"
 
-function get_member_config(username) {
-
-  const file_location = path.join(__dirname, '..', process.env.USERCONFIGDIR)
-  const file = file_location + '/' + username + '.json'
-
-  return jsonfile.readFileSync(file)
-
-}
-
-function get_payment_config(payid) {
-
-  const file_location = path.join(__dirname, '..', process.env.PAYMENTCONFIGDIR)
-  const file = file_location + '/' + payid + '.json'
-
-  return jsonfile.readFileSync(file)
-
-}
-
-function update_payment_config(payid, data) {
-
-  const file_location = path.join(__dirname, '..', process.env.PAYMENTCONFIGDIR)
-  const file = file_location + '/' + payid + '.json'
- 
-  jsonfile.writeFileSync(file, data)
-
-}
-
-function create_stripe_payment_config(stripe_pi_id, data) {
-
-  const file_location = path.join(__dirname, '..', process.env.STRIPEPAYMENTCONFIGDIR)
-  const file = file_location + '/' + stripe_pi_id + '.json'
- 
-  jsonfile.writeFileSync(file, data)
-
-}
-
 router.get('/:payid/thankyou', function(req, res) {
 
-  const payment_config = get_payment_config(req.params.payid)
+  const payment_config = data.getPayment(req.params.payid)
   let billplz_flag = false
 
   try {
@@ -75,7 +41,8 @@ router.get('/:payid/thankyou', function(req, res) {
 
     payment_config.billplz_paid = "true"
 
-    update_payment_config(req.params.payid, payment_config)
+    data.setPayment(req.params.payid, payment_config)
+    //update_payment_config(req.params.payid, payment_config)
 
   }
 
@@ -97,8 +64,8 @@ router.get('/:payid/thankyou', function(req, res) {
 
 router.post('/:payid/paid', urlencodedParser, function(req, res) {
 
-  const payment_config = get_payment_config(req.params.payid)
-  const member_config = get_member_config(payment_config.username)
+  const payment_config = data.getPayment(req.params.payid)
+  const member_config = data.getUser(payment_config.username)
 
   if (req.body.paid == "true") {
     const billplz_paid = req.body.paid
@@ -108,7 +75,8 @@ router.post('/:payid/paid', urlencodedParser, function(req, res) {
     payment_config.billplz_state = billplz_state
     payment_config.billplz_paid_at = billplz_paid_at
 
-    update_payment_config(req.params.payid, payment_config)
+    data.setPayment(req.params.payid, payment_config)
+    //update_payment_config(req.params.payid, payment_config)
   
     let message = "@" + member_config.telegram_username
     message += " " + payment_config.name + " make a payment with amount RM" + (payment_config.item_price/100).toFixed(2)
@@ -122,7 +90,7 @@ router.post('/:payid/paid', urlencodedParser, function(req, res) {
 
 router.get('/:payid', async function(req, res) {
 
-  const payment_config = get_payment_config(req.params.payid)
+  const payment_config = data.getPayment(req.params.payid)
   var paid_flag = payment_config.billplz_paid == "true" ? true : false
   const stripe_paid_flag = payment_config.stripe_paid == "true" ? true : false
   let stripe_amount = payment_config.item_price
@@ -156,7 +124,8 @@ router.get('/:payid', async function(req, res) {
         cancel_url: url_sistem + "pay/" + req.params.payid,
       });
 
-      create_stripe_payment_config(session.payment_intent, {"payid": req.params.payid})
+      data.setStripe(session.payment_intent, {"payid": req.params.payid})
+      //create_stripe_payment_config(session.payment_intent, {"payid": req.params.payid})
     }
 
     
@@ -196,7 +165,7 @@ router.get('/:payid', async function(req, res) {
 
 router.post('/:payid', urlencodedParser, function(req, res) {
 
-    const payment_config = get_payment_config(req.params.payid)
+    const payment_config = data.getPayment(req.params.payid)
     const phone_no = payment_config.phone_no
     const name = payment_config.name
 
@@ -228,7 +197,8 @@ router.post('/:payid', urlencodedParser, function(req, res) {
 
         payment_config.billplz_id = result.id
 
-        update_payment_config(req.params.payid, payment_config)
+        data.setPayment(req.params.payid, payment_config)
+        //update_payment_config(req.params.payid, payment_config)
 
         res.redirect(result.url + '?auto_submit=true');
       })

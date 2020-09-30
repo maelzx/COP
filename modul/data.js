@@ -78,6 +78,10 @@ class Data {
         return this.getData("STRIPE", key)
     }
 
+    setStripe(id, data) {
+        return this.setData("STRIPE", id, data)
+    }
+
 }
 
 module.exports = Data
